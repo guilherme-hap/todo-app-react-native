@@ -65,6 +65,15 @@ export default function Index() {
     { id: crypto.randomUUID(), value: "Sample Todo 3", done: false },
   ]);
 
+  const [filter, setFilter] = React.useState<'all' | 'pending' | 'done'>('all');
+
+  const filteredTodos = todos.filter(todo => {
+    if (filter === 'all') return true;
+    if (filter === 'pending') return !todo.done;
+    if (filter === 'done') return todo.done;
+    return true;
+  });
+
   const addTodo = (text: string) => {
     setTodos([...todos, { id: crypto.randomUUID(), value: text, done: false }]);
   };
@@ -80,10 +89,15 @@ export default function Index() {
           <Text style={{ fontSize: 32, fontWeight: "bold", marginTop: 20 }}>
             TODO List
           </Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'center', marginVertical: 10 }}>
+            <Button title="Todos" onPress={() => setFilter('all')} color={filter === 'all' ? 'blue' : 'gray'} />
+            <Button title="Pendentes" onPress={() => setFilter('pending')} color={filter === 'pending' ? 'blue' : 'gray'} />
+            <Button title="Concluídos" onPress={() => setFilter('done')} color={filter === 'done' ? 'blue' : 'gray'} />
+          </View>
           <AddTodoForm addTodoHandler={addTodo} />
           <FlatList
             style={styles.list}
-            data={todos.sort((a, b) => a.done === b.done ? 0 : a.done ? 1 : -1)}
+            data={filteredTodos.sort((a, b) => a.done === b.done ? 0 : a.done ? 1 : -1)}
             renderItem={({ item }) => <ListItem todoItem={item} toggleTodo={toggleTodo} />}
           />
         </GestureHandlerRootView>
