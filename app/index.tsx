@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Button, Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { FlatList, GestureHandlerRootView } from "react-native-gesture-handler";
 
-import { getAllTodos, getDBVersion, getSQLiteVersion, migrateDB } from "@/lib/db";
-import * as crypto from "expo-crypto";
+import { addTodoToDB, getAllTodos, getDBVersion, getSQLiteVersion, migrateDB, toggleTodoStatus } from "@/lib/db";
 import { SQLiteProvider, useSQLiteContext } from "expo-sqlite";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { TodoItem, uuid } from "../lib/types";
@@ -145,12 +144,16 @@ function TodoList() {
 
   const [filter, setFilter] = React.useState<FilterOptions>(FilterOptions.All);
 
-  const addTodo = (text: string) => {
-    setTodos([...todos, { id: crypto.randomUUID(), text: text, done: false, createdAt: new Date() }]);
+  const addTodo = async (text: string) => {
+    await addTodoToDB(db, text);
+    const result = await getAllTodos(db);
+    setTodos(result);
   };
 
-  const toggleTodo = (id: uuid) => {
-    setTodos(todos.map(todo => todo.id === id ? { ...todo, done: !todo.done } : todo));
+  const toggleTodo = async (id: uuid) => {
+    await toggleTodoStatus(db, id);
+    const result = await getAllTodos(db);
+    setTodos(result);
   };
 
   return (

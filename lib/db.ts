@@ -1,7 +1,21 @@
+
 import { SQLiteDatabase } from "expo-sqlite";
 
 import * as crypto from "expo-crypto";
 import { TodoItem } from "./types";
+
+export async function toggleTodoStatus(db: SQLiteDatabase, id: string): Promise<void> {
+    await db.runAsync(`UPDATE todos SET done = NOT done WHERE id = ?`, [id]);
+}
+
+export async function addTodoToDB(db: SQLiteDatabase, text: string): Promise<void> {
+    const id = crypto.randomUUID();
+    const createdAt = new Date().toISOString();
+    await db.runAsync(
+        `INSERT INTO todos (id, text, done, createdAt) VALUES (?, ?, 0, ?)`,
+        [id, text, createdAt]
+    );
+}
 
 
 export async function migrateDB(db:SQLiteDatabase){
